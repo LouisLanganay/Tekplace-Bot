@@ -38,7 +38,7 @@ To use this project, follow these steps:
         4. Copy the value of the `Authorization` header.
         5. Paste the value into the `.env` file without the `Bearer ` prefix.
 
-    ![Tekplace Token](./images/cookie.png)
+    ![Tekplace Token](./img/cookie.png)
 
     - The image path must be a valid path to the image you want to use.
     - The pixels offset is the offset from the top left corner of the image to the top left corner of the pixels on Tekplace.
@@ -53,7 +53,7 @@ To use this project, follow these steps:
 
 Once the bot is running and configured, it will automatically begin placing pixels on Tekplace. Monitor the process and adjust settings as necessary.
 
-![Example](./images/example.png)
+![Example](./img/example.png)
 
 ## Disclaimer
 
