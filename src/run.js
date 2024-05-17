@@ -53,7 +53,7 @@ async function generate() {
     const pixel = ouput[i];
     const x = pixel.position.x + parseInt(process.env.X_OFFSET);
     const y = pixel.position.y + parseInt(process.env.Y_OFFSET);
-    const color = rgbaToHexClosest(pixel.color, colors);
+    let color = rgbaToHexClosest(pixel.color, colors);
     user = await getUser(process.env.USERNAME);
     map = await getMap();
     if (user.nbPixels <= 0) {
@@ -63,6 +63,14 @@ async function generate() {
 
       logWarning(`No more pixels available. Next pixel available in ${secondsUntilNextPixel} seconds. ==> SLEEP`);
       await sleep(secondsUntilNextPixel);
+    }
+    if (color === undefined) {
+      if (map.some(p => p.x === x && p.y === y)) {
+        color = '#FFF1E8';
+      } else {
+        logInfo(`Pixel at (${x}, ${y}) is transparent ==> SKIP`);
+        continue;
+      }
     }
     if (map.some(p => p.x === x && p.y === y && p.color === color)) {
       logInfo(`Pixel at (${x}, ${y}) already has color ${color} ==> SKIP`);

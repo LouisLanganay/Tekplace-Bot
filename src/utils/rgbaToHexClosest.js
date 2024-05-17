@@ -3,6 +3,9 @@ function rgbaToHexClosest(rgba, hexColors) {
   let minDistance = Number.MAX_VALUE;
   let closestColor = null;
 
+  if (rgba.a === 0)
+    return undefined;
+
   hexColors.forEach(hex => {
     const color = hexToRgb(hex);
     const colorArray = [color.r, color.g, color.b, color.a];
