@@ -16,7 +16,7 @@ async function displayStats(user, map, ouput) {
 
   const pixelsToPlace = ouput
     .filter(pixel => pixel.color.a !== 0)
-    .filter(pixel => map
+    .filter(pixel => !map
       .some(p => p.x === getPosition(pixel).x && p.y === getPosition(pixel).y && p.color === rgbaToHexClosest(pixel.color, colors)))
         .length;
 

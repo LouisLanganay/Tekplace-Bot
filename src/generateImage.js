@@ -32,7 +32,7 @@ async function waitForPixels() {
     let currentTime = new Date().getTime();
     let secondsUntilNextPixel = Math.ceil((nextPixelTime - currentTime) / 1000);
 
-    for (let i = 0; i < (secondsUntilNextPixel / 2); i++) {
+    for (let i = 0; i < (secondsUntilNextPixel / 1.2); i++) {
       const loadingChar = loadingChars[charIndex];
       currentTime = new Date().getTime();
       process.stdout.clearLine(1);
@@ -43,7 +43,7 @@ async function waitForPixels() {
       secondsUntilNextPixel = Math.ceil((nextPixelTime - currentTime) / 1000);
       waited = true;
     }
-    process.stdout.clearLine(1);
+    process.stdout.clearLine();
     process.stdout.cursorTo(0);
   }
 }
@@ -53,8 +53,8 @@ async function generateImage(ouput) {
     const pixel = ouput[i];
     let color = rgbaToHexClosest(pixel.color, colors);
     const { x, y } = getPosition(pixel);
-    const { map } = await getApiInformations();
     let user = await waitForPixels();
+    const { map } = await getApiInformations();
 
     if (color === undefined) {
       if (map.some(p => p.x === x && p.y === y)) {
