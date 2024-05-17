@@ -40,8 +40,6 @@ async function getApiInformations() {
 }
 
 async function waitForPixels() {
-  let firstMessage = false;
-  let i = 0;
   while (true) {
     const user = await getUser(process.env.USERNAME);
     if (user.nbPixels > 0)
@@ -51,8 +49,6 @@ async function waitForPixels() {
     const secondsUntilNextPixel = Math.ceil((nextPixelTime - currentTime) / 1000);
 
     logWarning(`⏳ WAITING ==> No more pixels available. Next pixel available in ${secondsUntilNextPixel} seconds.`);
-    firstMessage = true;
-    i++;
     await new Promise(resolve => setTimeout(resolve,
       (secondsUntilNextPixel * 1000 / 2) < 5000 ?
       5000 : secondsUntilNextPixel * 1000 / 2
