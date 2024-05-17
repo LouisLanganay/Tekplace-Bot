@@ -1,34 +1,12 @@
 const getMap = require("./api/getMap");
 const getUser = require("./api/getUser");
 const putPixel = require("./api/putPixel");
+const colors = require("./static/colors");
+const getPosition = require("./utils/getPosition");
 const { logInfo, logSuccess, logGray, logWarning } = require("./utils/log");
 const rgbaToHexClosest = require("./utils/rgbaToHexClosest");
 
-const colors = [
-  "#000000", // Black
-  "#1D2B53", // Dark Blue
-  "#7E2553", // Dark Purple
-  "#008751", // Dark Green
-  "#AB5236", // Brown
-  "#5F574F", // Dark Gray
-  "#C2C3C7", // Light Gray
-  "#FFF1E8", // White
-  "#FF004D", // Red
-  "#FFA300", // Orange
-  "#FFEC27", // Yellow
-  "#00E436", // Green
-  "#29ADFF", // Blue
-  "#83769C", // Indigo
-  "#FF77A8", // Pink
-  "#FFCCAA" // Peach
-]
-
-function getPosition(pixel) {
-  return {
-    x: pixel.position.x + parseInt(process.env.X_OFFSET),
-    y: pixel.position.y + parseInt(process.env.Y_OFFSET)
-  };
-}
+const loadingChars = ['⣾', '⣽', '⣻', '⢿', '⡿', '⣟', '⣯'];
 
 async function getApiInformations() {
   const user = await getUser(process.env.USERNAME);
@@ -40,19 +18,33 @@ async function getApiInformations() {
 }
 
 async function waitForPixels() {
+  let charIndex = 0;
+  let waited = false;
+
   while (true) {
     const user = await getUser(process.env.USERNAME);
-    if (user.nbPixels > 0)
+    if (user.nbPixels > 0) {
+      if (waited)
+        console.log();
       return user;
+    }
     const nextPixelTime = new Date(user.timeUntilNextPixel).getTime();
-    const currentTime = new Date().getTime();
-    const secondsUntilNextPixel = Math.ceil((nextPixelTime - currentTime) / 1000);
+    let currentTime = new Date().getTime();
+    let secondsUntilNextPixel = Math.ceil((nextPixelTime - currentTime) / 1000);
 
-    logWarning(`⏳ WAITING ==> No more pixels available. Next pixel available in ${secondsUntilNextPixel} seconds.`);
-    await new Promise(resolve => setTimeout(resolve,
-      (secondsUntilNextPixel * 1000 / 2) < 5000 ?
-      5000 : secondsUntilNextPixel * 1000 / 2
-    ));
+    for (let i = 0; i < (secondsUntilNextPixel / 2); i++) {
+      const loadingChar = loadingChars[charIndex];
+      currentTime = new Date().getTime();
+      process.stdout.clearLine(1);
+      process.stdout.cursorTo(0);
+      process.stdout.write(`\x1b[33m⏳ WAITING ${loadingChar} ==> No more pixels available. Next pixel available in ${secondsUntilNextPixel} seconds.\x1b[0m`);
+      await new Promise(resolve => setTimeout(resolve, 200));
+      charIndex = (charIndex + 1) % loadingChars.length;
+      secondsUntilNextPixel = Math.ceil((nextPixelTime - currentTime) / 1000);
+      waited = true;
+    }
+    process.stdout.clearLine(1);
+    process.stdout.cursorTo(0);
   }
 }
 
