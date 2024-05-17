@@ -1,6 +1,9 @@
 const sharp = require("sharp");
 const fs = require("fs");
 const { logInfo, logError } = require("./log");
+const inquirer = require("inquirer");
+const inquirerPrompt = require("inquirer-autocomplete-prompt");
+const updateEnvFile = require("./updateEnvFile");
 
 async function imageToJson(imagePath, outputJsonPath) {
   try {
@@ -29,9 +32,25 @@ async function imageToJson(imagePath, outputJsonPath) {
     }
 
     fs.writeFileSync(outputJsonPath, JSON.stringify(pixels, null, 2));
-    logInfo(`Pixel data has been written to ${outputJsonPath}`);
+    logInfo(`🖼️ CREATE ==> Pixel data has been written to ${outputJsonPath}`);
+    return 1;
   } catch (error) {
-    logError('Error processing the image:', error);
+    logError('❌ Error ==> Could not convert image to JSON.');
+
+    inquirer.registerPrompt('autocomplete', inquirerPrompt);
+    const prompt = await inquirer.prompt([{
+      type: 'autocomplete',
+      name: 'imagePath',
+      message: 'Please enter the path to the image file:',
+      source: async (answersSoFar, input) => {
+        if (!input)
+          return fs.readdirSync('./');
+        return fs.readdirSync(input);
+      }
+    }]);
+    await updateEnvFile('INPUT_IMAGE', prompt.imagePath);
+    process.env.INPUT_IMAGE = prompt.imagePath;
+    return imageToJson(prompt.imagePath, outputJsonPath);
   }
 }
 

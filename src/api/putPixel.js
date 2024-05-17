@@ -1,4 +1,5 @@
 const axios = require('axios');
+const { logError } = require('../utils/log');
 require('dotenv').config();
 
 const putPixel = async (x, y, color) => {
@@ -17,13 +18,13 @@ const putPixel = async (x, y, color) => {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + process.env.TOKEN,
       },
-      data : data
+      data: data
     };
 
     const response = await axios.request(config);
     return response.data;
   } catch (error) {
-    console.error('Error putting pixel:', error);
+    logError('❌ Error ==> Could not place the pixel.');
   }
 }
 

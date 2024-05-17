@@ -1,4 +1,5 @@
 const axios = require('axios');
+const { logError } = require('../utils/log');
 require('dotenv').config();
 
 const getMap = async () => {
@@ -15,7 +16,7 @@ const getMap = async () => {
     const response = await axios.request(config);
     return response.data;
   } catch (error) {
-    console.error('Error getting map:', error);
+    logError('❌ Error ==> Could not get the map.');
   }
 }
 
