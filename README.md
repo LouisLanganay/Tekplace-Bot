@@ -33,9 +33,10 @@ To use this project, follow these steps:
 
     - The token must be obtained from the Tekplace cookies:
         1. Press `CTRL + SHIFT + I` to open Developer Tools.
-        2. Go to the Application tab.
-        3. Navigate to Cookies -> Microsoft.
-        4. Find the token value and copy it.
+        2. Go to the Network tab.
+        3. Find the getMap request.
+        4. Copy the value of the `Authorization` header.
+        5. Paste the value into the `.env` file without the `Bearer ` prefix.
 
     ![Tekplace Token](./images/cookie.png)
 
