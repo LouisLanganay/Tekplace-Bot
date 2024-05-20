@@ -25,6 +25,7 @@ const putPixel = async (x, y, color) => {
     return response.data;
   } catch (error) {
     logError('❌ Error ==> Could not place the pixel.');
+    return null;
   }
 }
 

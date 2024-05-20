@@ -1,10 +1,12 @@
 const getMap = require('./api/getMap');
 const getUser = require('./api/getUser');
 const imageToJson = require('./utils/imageToJson');
-const ouput = require('../tmp/pixels.json');
+let ouput = require('../tmp/pixels.json');
 const displayStats = require('./displayStats');
 const displayQuestion = require('./displayQuestion');
 const generateImage = require('./generateImage');
+const { logGray } = require('./utils/log');
+const getPosition = require('./utils/getPosition');
 require('dotenv').config();
 
 async function generate() {
@@ -19,13 +21,18 @@ async function generate() {
     return;
 
   await displayStats(user, map, ouput);
-  const { mode } = await displayQuestion();
+  const { recurence, display, erase } = await displayQuestion();
 
-  if (mode === 'one-time') {
-    await generateImage(ouput);
+  if (display === 'random')
+    ouput = ouput.sort(() => Math.random() - 0.5);
+
+  if (recurence === 'one-time') {
+    await generateImage(ouput, erase);
   } else {
     while (true) {
-      await generateImage(ouput);
+      await generateImage(ouput, erase);
+      logGray('⏳ WAITING ==> 30 seconds before generating again.');
+      await new Promise(resolve => setTimeout(resolve, 30000));
     }
   }
 }

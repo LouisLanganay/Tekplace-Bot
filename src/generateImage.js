@@ -9,7 +9,7 @@ const rgbaToHexClosest = require("./utils/rgbaToHexClosest");
 const loadingChars = ['⣾', '⣽', '⣻', '⢿', '⡿', '⣟', '⣯'];
 
 async function getApiInformations() {
-  const user = await getUser(process.env.USERNAME);
+  const user = await waitForPixels();
   const map = await getMap();
   return {
     user,
@@ -32,13 +32,13 @@ async function waitForPixels() {
     let currentTime = new Date().getTime();
     let secondsUntilNextPixel = Math.ceil((nextPixelTime - currentTime) / 1000);
 
-    for (let i = 0; i < (secondsUntilNextPixel / 1.2); i++) {
+    for (let i = 0; i < (secondsUntilNextPixel * 2 < 10 ? 10 : secondsUntilNextPixel * 2); i++) {
       const loadingChar = loadingChars[charIndex];
       currentTime = new Date().getTime();
       process.stdout.clearLine(1);
       process.stdout.cursorTo(0);
       process.stdout.write(`\x1b[33m⏳ WAITING ${loadingChar} ==> No more pixels available. Next pixel available in ${secondsUntilNextPixel} seconds.\x1b[0m`);
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await new Promise(resolve => setTimeout(resolve, 300));
       charIndex = (charIndex + 1) % loadingChars.length;
       secondsUntilNextPixel = Math.ceil((nextPixelTime - currentTime) / 1000);
       waited = true;
@@ -48,13 +48,13 @@ async function waitForPixels() {
   }
 }
 
-async function generateImage(ouput) {
+async function generateImage(ouput, erase) {
+  let { user, map } = await getApiInformations();
+
   for (let i = 0; i < ouput.length; i++) {
     const pixel = ouput[i];
     let color = rgbaToHexClosest(pixel.color, colors);
     const { x, y } = getPosition(pixel);
-    let user = await waitForPixels();
-    const { map } = await getApiInformations();
 
     if (color === undefined) {
       if (map.some(p => p.x === x && p.y === y)) {
@@ -68,10 +68,21 @@ async function generateImage(ouput) {
       logInfo(`⏭️ SKIP ==> Pixel at (${x}, ${y}) already has color ${color}.`);
       continue;
     }
+    if (!erase && map.some(p => p.x === x && p.y === y)) {
+      logInfo(`⏭️ SKIP ==> Pixel at (${x}, ${y}) is already placed. (erase option is disabled)`);
+      continue;
+    }
     logSuccess(`🎨 PUT ==> Putting pixel at (${x}, ${y}) with color ${JSON.stringify(color)}.`);
-    logGray(`ℹ️ INFO ==> Remaining pixels: ${user.nbPixels - 1} - Remaining pixels to place: ${ouput.length - i - 1}`);
-    putPixel(x, y, color);
-    user.nbPixels -= 1;
+    logGray(`ℹ️ INFO ==> Remaining pixels: ${user.nbPixels -= 1} - Remaining pixels to place: ${ouput.length - i - 1}`);
+    let response = await putPixel(x, y, color);
+    if (response === null) {
+      logWarning('⚠️ WARNING ==> Could not place the pixel. Retrying...');
+      i--;
+      continue;
+    }
+    let updatedApiData = await getApiInformations();
+    user = updatedApiData.user;
+    map = updatedApiData.map;
   }
   logSuccess('🎉 All pixels have been placed!');
 }
