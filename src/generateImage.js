@@ -58,6 +58,10 @@ async function generateImage(ouput, erase) {
 
     if (color === undefined) {
       if (map.some(p => p.x === x && p.y === y)) {
+        if (!erase) {
+          logInfo(`⏭️ SKIP ==> Pixel at (${x}, ${y}) is already placed. (erase option is disabled)`);
+          continue;
+        }
         color = '#FFF1E8';
       } else {
         logInfo(`⏭️ SKIP ==> Pixel at (${x}, ${y}) is transparent.`);
@@ -66,10 +70,6 @@ async function generateImage(ouput, erase) {
     }
     if (map.some(p => p.x === x && p.y === y && p.color === color)) {
       logInfo(`⏭️ SKIP ==> Pixel at (${x}, ${y}) already has color ${color}.`);
-      continue;
-    }
-    if (!erase && map.some(p => p.x === x && p.y === y)) {
-      logInfo(`⏭️ SKIP ==> Pixel at (${x}, ${y}) is already placed. (erase option is disabled)`);
       continue;
     }
     logSuccess(`🎨 PUT ==> Putting pixel at (${x}, ${y}) with color ${JSON.stringify(color)}.`);
