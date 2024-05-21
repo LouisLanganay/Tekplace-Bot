@@ -24,7 +24,7 @@ async function displayQuestion() {
       type: 'confirm',
       name: 'choice3',
       message: 'The bot should erase misplaced pixels:',
-      default: true
+      default: false
     }
   ];
 
